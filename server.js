@@ -1,44 +1,29 @@
-// Main Serve
-const express = require('express');
-const app = express();
+// Main Server
 const cluster = require('cluster');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const passport = require('passport');
 const cpus = 4;
-const port = process.env.PORT || "8080";
+const mongoURI = 'mongodb://localhost:27017/queueingSystem';
 
-// for type of forks
+// For type of forks
 const type = ['Master', 'Express', 'Express', 'Compute', 'Compute'];
-
-// Api
-const loginAPI = require('./routes/auth/login');
-const signupAPI = require('./routes/auth/signup');
-
-// middlewares
-app.use(bodyParser.urlencoded({extended : false}));
-app.use(bodyParser.json()); // for populating JSON
-app.use(passport.initialize()); // initializing passport
-
-// for logginf requests
-app.use((req, res, next) => {
-    console.log("Worker", cluster.worker.id, "=>", "incoming request", req.url);
-    next();
-})
-
-// database connection
-mongoose.connect("mongodb://localhost:27017/queueingSystem", {useNewUrlParser: true, useUnifiedTopology: true})
-        .then(() => console.log("Worker", cluster.worker.id, "=>", "Database is Connected"))
-        .catch(err => console.log("SERVER : Database connection error"));
 
 // TODO
 // 1 redis coonnection
 
 
-// if the process is master
+// If the process is master
 if(cluster.isMaster)
 {
-    console.log(`Master Pid = ${process.pid}`);
+    console.log(`[Master] Pid = ${process.pid}`);
+
+    // Database connection
+    mongoose.connect(mongoURI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        })
+        .then(() => console.log("[Master] Database is connected"))
+        .catch(err => console.log("[Master] Database connection error"));
+
     // for storing forks
     let expressChildren = [];
     let computeChildren = [];
@@ -61,17 +46,46 @@ else if(cluster.isWorker)
 {
     if(type[cluster.worker.id] === 'Express') // if process is for express
     {
-        console.log(`Running Express Server on worker id ${cluster.worker.id}`);
+        const express = require('express');
+        const app = express();
+        const bodyParser = require('body-parser');
+        const passport = require('passport');
+        const port = process.env.PORT || "8080";
+        const workerName = `[Express Worker ${cluster.worker.id}]`;
+
+        // API
+        const loginAPI = require('./routes/auth/login');
+        const signupAPI = require('./routes/auth/signup');
+
+        // Middlewares
+        app.use(bodyParser.urlencoded({extended : false}));
+        app.use(bodyParser.json()); // for populating JSON
+        app.use(passport.initialize()); // initializing passport
+
+        // For logging requests
+        app.use((req, res, next) => {
+            console.log(workerName, "Incoming request at", req.url);
+            next();
+        })
+
+        // Database connection
+        mongoose.connect(mongoURI, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+            })
+            .then(() => console.log(workerName, "Database is connected"))
+            .catch(err => console.log(workerName, "Database connection error"));
         
         // loginAPI
         loginAPI(app);
         // signupAPI
         signupAPI(app);
 
-        app.listen(port, () => console.log("Worker", cluster.worker.id, "=>", "Sever is running on port", port));
+        app.listen(port, () => console.log(workerName, `Sever is running on http://localhost:${port}`));
     }   
     else // if process if for Compute
     {
-        console.log(`Running Compute Server on worker id ${cluster.worker.id}`);
+        const workerName = `[Compute Worker ${cluster.worker.id}]`;
+        console.log(workerName, 'Ready for some work.');
     }
 }

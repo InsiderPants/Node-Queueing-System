@@ -18,14 +18,17 @@ const cluster = require("cluster");
 
 if(cluster.isMaster)
 {
-    for(let i = 0; i < 4; i++)
+    for(let i = 0; i < 5; i++)
     {
         let worker = cluster.fork();
         worker.send({t : "hello from master"});
-        worker.on("temp", msg => {
+        worker.on("message", msg => {
             console.log("from worker", msg);
         })
     }
+    cluster.on('exit', (worker, code, signal) => {
+        console.log("from exit", worker.id, code, signal);
+    })
 }
 else
 {
@@ -34,4 +37,6 @@ else
         console.log('Message from parent:', message);
     })
     process.send({ttt: "ndnk"});
+
+    process.exit(0);
 }

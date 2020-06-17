@@ -26,7 +26,6 @@ const loginApi = (app) => {
     app.post('/login', (req, res) => {
         const email = req.body.email;
         const password = req.body.password;
-
         User.findOne({'email' : email}, (err, doc) => {
             if(err)
             {

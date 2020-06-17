@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "nodemon server.js",
-    "db-server": "mongod --dbpath \"database\"",
+    "db-server": "[ -d database ] || mkdir \"database\" && mongod --dbpath \"$PWD/database\"",
     "redis-server": "redis-server"
   },
   "repository": {

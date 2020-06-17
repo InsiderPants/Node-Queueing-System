@@ -27,7 +27,6 @@ const loginApi = (app) => {
         const email = req.body.email;
         const password = req.body.password;
 
-        console.log(new Date().toISOString())
         User.findOne({'email' : email}, (err, doc) => {
             if(err)
             {
@@ -40,7 +39,6 @@ const loginApi = (app) => {
             }
             else
             {   
-                console.log(new Date().toISOString())
                 if(doc === null)
                     res.json({
                         success : false,
@@ -48,17 +46,15 @@ const loginApi = (app) => {
                     });
                 else
                 {
-                    console.log(new Date().toISOString())
                     bcrypt.compare(password, doc.password)
                         .then(match => {
-                            if(match === false)
+                            if(match == false)
                                 // password is incorrect
                                 res.json({
                                     success : false,
                                     message : WRONG_PASSWORD
                                 })
                             
-                            console.log(new Date().toISOString())
                             const payload = {
                                 name : doc.name,
                                 email : doc.email,
@@ -73,7 +69,6 @@ const loginApi = (app) => {
                                         message : SERVER_ERROR,
                                     })
                                 }
-                                console.log(new Date().toISOString())
                                 // send success with token
                                 res.status(200).json({
                                     success : true, 

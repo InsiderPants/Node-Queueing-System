@@ -2,12 +2,12 @@ const cluster = require('cluster');
 const asyncLock = require('async-lock');
 const Lock = new asyncLock();
 const Job = require('../modals/jobDB');
-const { jobQueue, freeComputeWorkers, typeOfProcess } = require('../config/keys');
+const { jobQueue, freeComputeWorkers, typeOfProcess, jobIDCounter } = require('../config/keys');
 const { exception } = require("console");
 const { resolve } = require('path');
 const { ExtractJwt } = require('passport-jwt');
-const NUM_EXPRESS_PROCESSES = 2;
-const NUM_COMPUTE_PROCESSES = 2;
+const NUM_EXPRESS_PROCESSES = 6;
+const NUM_COMPUTE_PROCESSES = 6;
 let ExpressProcessMap = new Map(); // creating local map for express
 let ComputeProcessMap = new Map(); // creating local map for compute
 
@@ -62,6 +62,7 @@ function computeChildrenListener(msg, computeChild, redisClient)
     if(msg.done !== true)
         throw new exception("Unknown message from computeProcess");
 
+    console.log(msg);
     Lock.acquire(jobQueue, (done) => {
         redisClient.lpop(jobQueue, (err, val) => {
             if(err || val === null)
@@ -92,12 +93,23 @@ function computeChildrenListener(msg, computeChild, redisClient)
                 jobID : parseInt(job),
             });
         }
+        else
+        {
+            redisClient.rpush(freeComputeWorkers, computeChild.id);
+        }
     }); // end of Lock
 }
 
 const jobDistribution = (redisClient) => {
     // clearing up existing hsets
     redisClient.del(typeOfProcess, freeComputeWorkers);
+
+    redisClient.get(jobIDCounter, (err, val) => {
+        if(err)
+            throw new Error("Error while initializing Job ID counter" + err);
+        if(val === null)
+            redisClient.set(jobIDCounter, 1);
+    })
 
     // set up express and compute processes
     for(let i = 0; i < NUM_EXPRESS_PROCESSES; i++)

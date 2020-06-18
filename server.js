@@ -68,7 +68,7 @@ else if(cluster.isWorker)
         
             // For logging requests
             app.use((req, res, next) => {
-                console.log(workerName, "Incoming request at", req.url);
+                console.log(workerName, "Incoming request at", req.url, "from IP address", req.ip);
                 next();
             })
         

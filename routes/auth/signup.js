@@ -39,7 +39,7 @@ const signupAPI = (app) => {
             {
                 if(doc !== null)
                     // already exists
-                    res.json({
+                    return res.json({
                         success : false,
                         message : USER_ALREADY_EXIST
                     });
@@ -54,7 +54,7 @@ const signupAPI = (app) => {
                     if(err)
                     {
                         console.log("Error in generating salt =>", err)
-                        res.json({
+                        return res.json({
                             success : false,
                             message : SERVER_ERROR
                         });
@@ -63,7 +63,7 @@ const signupAPI = (app) => {
                         if(err)
                         {
                             console.log("Error in generating hash =>", err);
-                            res.json({
+                            return res.json({
                                 success : false,
                                 message : SERVER_ERROR,
                             });
@@ -73,7 +73,7 @@ const signupAPI = (app) => {
                             if(err)
                             {
                                 console.log("Error in saving in database =>", err);
-                                res.json({
+                                return res.json({
                                     success : false,
                                     message : DATABASE_WRITE_ERROR,
                                 });

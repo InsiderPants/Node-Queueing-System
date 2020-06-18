@@ -3,6 +3,7 @@ const passport = require('passport');
 const path = require('path');
 const Job = require('../../modals/jobDB');
 const { jobQueue, jobIDCounter } = require('../../config/keys');
+const { resolve } = require('path');
 
 // messages
 const {
@@ -52,8 +53,8 @@ const jobsAPI = (app, redisClient, jobIDLock) => {
 
             // moving the file
             promiseArray.push(
-                req.files.jobFile.mv(path.join(__dirname, '../../userFiles/', fileName), (err) => {
-                    return new Promise((resolve, reject) => {
+                new Promise((resolve, reject) => {
+                    req.files.jobFile.mv(path.join(__dirname, '../../userFiles/', fileName), (err) => {
                         if(err)
                             reject("Error moving Files " + err);
                         else    
@@ -64,8 +65,8 @@ const jobsAPI = (app, redisClient, jobIDLock) => {
 
             // adding to database
             promiseArray.push(
-                Job.findOne({'jobID' : jobID}, (err, job) => {
-                    return new Promise((resolve, reject) => {
+                new Promise((resolve, reject) => {
+                    Job.findOne({'jobID' : jobID}, (err, job) => {
                         if(err)
                             reject(err);
                         else
@@ -89,8 +90,8 @@ const jobsAPI = (app, redisClient, jobIDLock) => {
 
             // adding job to the queue
             promiseArray.push(
-                redisClient.rpush(jobQueue, jobID, (err, _) => {
-                    return new Promise((resolve, reject) => {
+                new Promise((resolve, reject) => {
+                    redisClient.rpush(jobQueue, jobID, (err, _) => {
                         if(err)
                             reject("Error while adding job to the queue " + err);
                         else

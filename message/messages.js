@@ -6,10 +6,12 @@ const message = {
         WRONG_PASSWORD : 'Password is incorrect',
         SERVER_ERROR : 'Server Error',
         USER_ALREADY_EXIST : "Email Already exists",
+        NO_FILES_ATTACHED : 'No files attached in request', 
     },
     SUCCESS : {
         SUCCESSFUL_LOGIN : 'Login Successful',
         SUCCESSFUL_SIGNUP : "Signup Successful",
+        JOB_ADDED_SUCCESSFULLY : 'Job added successfully to the Queue',
     }
 }
 

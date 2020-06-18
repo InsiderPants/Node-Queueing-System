@@ -31,7 +31,7 @@ const loginApi = (app) => {
             {
                 // if there is some database error
                 console.log("Error in Database find => ", err);
-                res.status(500).json({
+                return res.status(500).json({
                     success : false,
                     message : DATABASE_READ_ERROR
                 });
@@ -39,7 +39,7 @@ const loginApi = (app) => {
             else
             {   
                 if(doc === null)
-                    res.json({
+                    return res.json({
                         success : false,
                         message : USER_NOT_FOUND
                     });
@@ -49,7 +49,7 @@ const loginApi = (app) => {
                         .then(match => {
                             if(match == false)
                                 // password is incorrect
-                                res.json({
+                                return res.json({
                                     success : false,
                                     message : WRONG_PASSWORD
                                 })
@@ -63,13 +63,13 @@ const loginApi = (app) => {
                                 if(err)
                                 {
                                     console.log("Error in login api at JWT sign => ", err);
-                                    res.json({
+                                    return res.status(500).json({
                                         success : false,
                                         message : SERVER_ERROR,
                                     })
                                 }
                                 // send success with token
-                                res.status(200).json({
+                                return res.status(200).json({
                                     success : true, 
                                     message : SUCCESSFUL_LOGIN,
                                     body : {
@@ -81,7 +81,7 @@ const loginApi = (app) => {
                         })
                         .catch(err => {
                             console.log("Error in loginapu at bcrypt password compare => ", err);
-                            res.json({
+                            res.status(500).json({
                                 success : false,
                                 message : SERVER_ERROR
                             });

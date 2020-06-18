@@ -51,7 +51,7 @@ else if(cluster.isWorker)
             const Asynclock = require('async-lock');
             const port = process.env.PORT || "8080";
             const ValidateApiAccess = require('./utils/validateApi');
-            const workerName = `[Express Worker ${cluster.worker.id}]`;
+            const workerName = '[Express Worker ' + cluster.worker.id.toString() + ' ]';
         
             // API
             const loginAPI = require('./routes/auth/login');
@@ -97,11 +97,12 @@ else if(cluster.isWorker)
         }
         else
         {
-            const workerName = `[Compute Worker ${cluster.worker.id}]`;
+            const computationProcess = require('./computation/computation');
+            const workerName = '[Compute Worker ' + cluster.worker.id.toString() + ' ]';
             console.log(workerName, 'Ready for some work.');
         
             process.on('message', msg => {
-                console.log(workerName, "got job", msg);
+                computationProcess(msg.jobID);
             })
         }
     })

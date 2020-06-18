@@ -7,6 +7,7 @@ const message = {
         SERVER_ERROR : 'Server Error',
         USER_ALREADY_EXIST : "Email Already exists",
         NO_FILES_ATTACHED : 'No files attached in request', 
+        NO_SUCH_JOB_EXISTS : 'No such job ID exists',
     },
     SUCCESS : {
         SUCCESSFUL_LOGIN : 'Login Successful',

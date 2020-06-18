@@ -3,12 +3,12 @@ const passport = require('passport');
 const path = require('path');
 const Job = require('../../modals/jobDB');
 const { jobQueue, jobIDCounter } = require('../../config/keys');
-const { resolve } = require('path');
 
 // messages
 const {
     NO_FILES_ATTACHED,
     SERVER_ERROR,
+    NO_SUCH_JOB_EXISTS,
 } = require('../../message/messages').ERROR;
 
 const {
@@ -131,6 +131,39 @@ const jobsAPI = (app, redisClient, jobIDLock) => {
             })
         })
     }); // add Job api end
+
+
+    /*
+        route : /api/getJjobstatus
+        method : POST
+        access : private
+        desc : for getting the status of jobs
+    */
+    app.post('/api/getjobstatus', passport.authenticate('jwt', {session : false}), (req, res) => {
+        const jobID = req.body.jobID;
+        Job.findOne({'jobID' : jobID}, (err, job) => {
+            if(err)
+            {
+                return res.status(500).json({
+                    success : false,
+                    message : SERVER_ERROR,
+                })
+            }
+            if(job === null)
+            {
+                return res.status(400).json({
+                    success : false,
+                    message : NO_SUCH_JOB_EXISTS,
+                })
+            }
+            res.status(200).json({
+                success : true,
+                body : {
+                    status : job.status,
+                }
+            });
+        })
+    })
 }
 
 module.exports = jobsAPI;
